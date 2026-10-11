@@ -32,7 +32,6 @@ import {
   RiArrowRightSLine,
   RiContactsBook2Line,
   RiFocus2Fill as RiTargetFill,
-  RiNodeTree,
 } from "react-icons/ri";
 import { pathToTourPage, replayPageTour } from "@/lib/tour";
 import { useTranslation } from "@/lib/i18n/LanguageContext";
@@ -57,7 +56,7 @@ type NavItem =
     }
   | {
       type: "group";
-      id: "leads" | "campaigns";
+      id: "leads";
       labelKey: string;
       icon: any;
       color?: string;
@@ -82,16 +81,7 @@ const mainNav: NavItem[] = [
   },
   { type: "link", href: "/pipeline", labelKey: "nav.pipeline", icon: RiKanbanView, color: "#ec4899", tour: "nav-pipeline" },
   { type: "link", href: "/calendar", labelKey: "nav.calendar", icon: RiCalendarEventLine, color: "#8b5cf6", tour: "nav-calendar" },
-  {
-    type: "group",
-    id: "campaigns",
-    labelKey: "nav.campaigns",
-    icon: RiTargetFill,
-    color: "#f79009",
-    children: [
-      { href: "/workflows", labelKey: "nav.sequences", icon: RiNodeTree, color: "#f79009", tour: "nav-workflows" },
-    ],
-  },
+  { type: "link", href: "/workflows", labelKey: "nav.campaigns", icon: RiTargetFill, color: "#f79009", tour: "nav-workflows" },
   { type: "link", href: "/inbox", labelKey: "nav.inbox", icon: RiInboxLine, color: "#0086c9", tour: "nav-inbox" },
   { type: "link", href: "/sdr", labelKey: "nav.sdrAgent", icon: RiRobot3Line, color: "#8b5cf6", tour: "nav-sdr" },
   { type: "link", href: "/email-health", labelKey: "nav.emailHealth", icon: RiMailCheckLine, color: "#fb6514", tour: "nav-email-health" },
@@ -119,14 +109,10 @@ export default function Sidebar({
   const [helpOpen, setHelpOpen] = useState(false);
   const [langOpen, setLangOpen] = useState(false);
   const [leadsOpen, setLeadsOpen] = useState(false);
-  const [campaignsOpen, setCampaignsOpen] = useState(false);
 
   useEffect(() => {
     if (["/lists", "/contacts", "/companies"].some((p) => router.pathname.startsWith(p))) {
       setLeadsOpen(true);
-    }
-    if (["/workflows"].some((p) => router.pathname.startsWith(p))) {
-      setCampaignsOpen(true);
     }
   }, [router.pathname]);
 
@@ -316,9 +302,9 @@ export default function Sidebar({
             );
           }
 
-          // Collapsible group (Leads, Campañas)
-          const isOpen = item.id === "leads" ? leadsOpen : campaignsOpen;
-          const setOpen = item.id === "leads" ? setLeadsOpen : setCampaignsOpen;
+          // Collapsible group (Leads)
+          const isOpen = leadsOpen;
+          const setOpen = setLeadsOpen;
           const isGroupActive = item.children.some((child) => isActive(child.href));
           const label = t(item.labelKey);
 

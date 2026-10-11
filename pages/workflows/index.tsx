@@ -230,8 +230,8 @@ export default function WorkflowsPage({ initialWorkflows }: { initialWorkflows: 
   return (
     <>
       <Head>
-        <title>Secuencias — InHubFlow B2B</title>
-        <meta name="description" content="Automatización y secuencias omnicanal de prospección en LinkedIn y Cold Email." />
+        <title>Campañas — InHubFlow B2B</title>
+        <meta name="description" content="Automatización y campañas omnicanal de prospección en LinkedIn y Cold Email." />
         <meta name="robots" content="noindex, nofollow" />
       </Head>
       <div>
