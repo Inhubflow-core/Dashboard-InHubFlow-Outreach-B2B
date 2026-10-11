@@ -28,7 +28,6 @@ import {
   RiTeamLine,
   RiVideoLine,
   RiRadarLine,
-  RiMegaphoneLine,
   RiArrowDownSLine,
   RiArrowRightSLine,
   RiContactsBook2Line,
@@ -91,7 +90,6 @@ const mainNav: NavItem[] = [
     color: "#f79009",
     children: [
       { href: "/workflows", labelKey: "nav.sequences", icon: RiNodeTree, color: "#f79009", tour: "nav-workflows" },
-      { href: "/social-selling", labelKey: "nav.socialSelling", icon: RiMegaphoneLine, color: "#8b5cf6", tour: "nav-social-selling" },
     ],
   },
   { type: "link", href: "/inbox", labelKey: "nav.inbox", icon: RiInboxLine, color: "#0086c9", tour: "nav-inbox" },
@@ -127,7 +125,7 @@ export default function Sidebar({
     if (["/lists", "/contacts", "/companies"].some((p) => router.pathname.startsWith(p))) {
       setLeadsOpen(true);
     }
-    if (["/workflows", "/social-selling"].some((p) => router.pathname.startsWith(p))) {
+    if (["/workflows"].some((p) => router.pathname.startsWith(p))) {
       setCampaignsOpen(true);
     }
   }, [router.pathname]);

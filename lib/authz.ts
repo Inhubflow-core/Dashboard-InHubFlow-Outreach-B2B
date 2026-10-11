@@ -246,3 +246,91 @@ export function canManageSdrAgent(
       actorCanAccessWorkspace(actor, row.workspace_owner_id ?? actor.workspaceOwnerId),
   );
 }
+
+export interface AuthorizedAccount {
+  id: string;
+  name: string;
+  unipile_account_id: string | null;
+  unipile_status: string | null;
+}
+
+export function getAuthorizedAccounts(
+  db: Database.Database,
+  sessionUser: any
+): AuthorizedAccount[] {
+  if (!sessionUser) return [];
+
+  const email = typeof sessionUser.email === "string" ? sessionUser.email.trim().toLowerCase() : "";
+  const isSuperAdmin = email === "inhubflow@gmail.com";
+  const accountFilter = email === "demo@inhubflow.com" ? "1=1" : "id NOT LIKE 'demo_%'";
+
+  if (isSuperAdmin) {
+    return db
+      .prepare(`SELECT id, name, unipile_account_id, unipile_status FROM accounts WHERE ${accountFilter} ORDER BY name ASC`)
+      .all() as AuthorizedAccount[];
+  }
+
+  const ownerId = typeof sessionUser.owner_id === "string" && sessionUser.owner_id ? sessionUser.owner_id : null;
+  const workspaceOwnerId = ownerId ?? sessionUser.id;
+  const isWorkspaceOwner = ownerId === null;
+  const role = typeof sessionUser.role === "string" ? sessionUser.role : "user";
+  const isWorkspaceAdmin = isWorkspaceOwner || role === "admin";
+  const assignedAccountId =
+    typeof sessionUser.assigned_account_id === "string" && sessionUser.assigned_account_id
+      ? sessionUser.assigned_account_id
+      : null;
+
+  if (isWorkspaceAdmin) {
+    if (email === "demo@inhubflow.com") {
+      return db
+        .prepare(
+          `SELECT id, name, unipile_account_id, unipile_status FROM accounts WHERE ${accountFilter} ORDER BY name ASC`
+        )
+        .all() as AuthorizedAccount[];
+    }
+    if (isWorkspaceOwner) {
+      return db
+        .prepare(
+          `SELECT id, name, unipile_account_id, unipile_status FROM accounts WHERE ${accountFilter} AND (owner_id = ? OR owner_id IS NULL) ORDER BY name ASC`
+        )
+        .all(workspaceOwnerId) as AuthorizedAccount[];
+    }
+    return db
+      .prepare(
+        `SELECT id, name, unipile_account_id, unipile_status FROM accounts WHERE ${accountFilter} AND owner_id = ? ORDER BY name ASC`
+      )
+      .all(workspaceOwnerId) as AuthorizedAccount[];
+  }
+
+  if (assignedAccountId) {
+    return db
+      .prepare(
+        "SELECT id, name, unipile_account_id, unipile_status FROM accounts WHERE id = ? AND (owner_id = ? OR owner_id IS NULL)"
+      )
+      .all(assignedAccountId, workspaceOwnerId) as AuthorizedAccount[];
+  }
+
+  return db
+    .prepare(
+      "SELECT id, name, unipile_account_id, unipile_status FROM accounts WHERE assigned_user_id = ? AND (owner_id = ? OR owner_id IS NULL) ORDER BY name ASC"
+    )
+    .all(sessionUser.id, workspaceOwnerId) as AuthorizedAccount[];
+}
+
+export function getAuthorizedAccountIds(
+  db: Database.Database,
+  sessionUser: any
+): string[] {
+  return getAuthorizedAccounts(db, sessionUser).map((a) => a.id);
+}
+
+export function isAccountAuthorized(
+  db: Database.Database,
+  sessionUser: any,
+  accountId: string
+): boolean {
+  if (!accountId) return false;
+  const allowed = getAuthorizedAccountIds(db, sessionUser);
+  return allowed.includes(accountId);
+}
+

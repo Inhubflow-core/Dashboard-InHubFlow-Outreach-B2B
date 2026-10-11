@@ -113,7 +113,6 @@ export function autoSeedInstance(db: Database.Database): AutoSeedResult {
     db.prepare(`DELETE FROM sdr_threads WHERE id LIKE 'demo_th_%' OR target_id LIKE 'demo_target_%'`).run();
     db.prepare(`DELETE FROM signal_leads WHERE id LIKE 'demo_sig_%'`).run();
     db.prepare(`DELETE FROM signal_monitors WHERE id LIKE 'demo_mon_%'`).run();
-    db.prepare(`DELETE FROM social_selling_posts WHERE id LIKE 'demo_sp_%'`).run();
     db.prepare(`DELETE FROM linkedin_inbox_messages WHERE id LIKE 'demo_msg_%'`).run();
     db.prepare(`DELETE FROM calendar_events WHERE id LIKE 'demo_cal_%'`).run();
     db.prepare(`DELETE FROM email_accounts WHERE id LIKE 'demo_email_%'`).run();

@@ -11,7 +11,6 @@ import { applyTagsSchema } from "@/lib/tags/schema";
 import { applyCalendarSchema } from "@/lib/calendar/schema";
 import { applySignalSchema } from "@/lib/signals/schema";
 import { applyCompaniesSchema } from "@/lib/companies/schema";
-import { applySocialSellingSchema } from "@/lib/social-selling/schema";
 import { backfillLinkedInConnectionAttempts } from "@/lib/linkedin/connection-attempts";
 
 function resolveDbPath(): string {
@@ -78,7 +77,6 @@ export function cleanDemoDataFromMainDb(targetDb: Database.Database): void {
     `DELETE FROM sdr_threads WHERE id LIKE 'demo_%' OR target_id LIKE 'demo_%'`,
     `DELETE FROM signal_leads WHERE id LIKE 'demo_%'`,
     `DELETE FROM signal_monitors WHERE id LIKE 'demo_%'`,
-    `DELETE FROM social_selling_posts WHERE id LIKE 'demo_%'`,
     `DELETE FROM linkedin_inbox_messages WHERE id LIKE 'demo_%' OR target_id LIKE 'demo_%' OR account_id LIKE 'demo_%'`,
     `DELETE FROM linkedin_target_accounts WHERE target_id LIKE 'demo_%' OR account_id LIKE 'demo_%'`,
     `DELETE FROM linkedin_step_deliveries WHERE target_id LIKE 'demo_%' OR run_id LIKE 'demo_%'`,
@@ -1165,9 +1163,6 @@ function runMigrations(db: Database.Database) {
 
   // Companies and Account-Based Marketing (ABM) module
   applyCompaniesSchema(db);
-
-  // Social Selling module: Viral content radar, AI content modeling, and monthly post scheduler
-  applySocialSellingSchema(db);
 
   // Keep provider implementation details out of customer-facing activity and
   // diagnostics, including historical rows written by older releases.

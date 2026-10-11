@@ -52,27 +52,6 @@ function isoDateAhead(days, hours = 0) {
 
 // Ensure required tables exist
 db.exec(`
-  CREATE TABLE IF NOT EXISTS social_selling_posts (
-    id TEXT PRIMARY KEY,
-    user_id TEXT,
-    account_id TEXT NOT NULL,
-    topic TEXT,
-    content TEXT NOT NULL,
-    image_prompt TEXT,
-    media_url TEXT,
-    media_type TEXT NOT NULL DEFAULT 'none',
-    original_post_url TEXT,
-    original_author TEXT,
-    original_content TEXT,
-    original_metrics_json TEXT,
-    scheduled_at TEXT NOT NULL,
-    status TEXT NOT NULL DEFAULT 'scheduled',
-    linkedin_post_urn TEXT,
-    error_message TEXT,
-    created_at TEXT NOT NULL DEFAULT (datetime('now')),
-    published_at TEXT
-  );
-
   CREATE TABLE IF NOT EXISTS sdr_meeting_bookings (
     id TEXT PRIMARY KEY,
     thread_id TEXT,
@@ -131,7 +110,6 @@ db.transaction(() => {
   db.prepare(`DELETE FROM targets WHERE id LIKE 'demo_target_%'`).run();
   db.prepare(`DELETE FROM signal_leads WHERE id LIKE 'demo_sig_%'`).run();
   db.prepare(`DELETE FROM signal_monitors WHERE id LIKE 'demo_mon_%'`).run();
-  db.prepare(`DELETE FROM social_selling_posts WHERE id LIKE 'demo_sp_%'`).run();
   db.prepare(`DELETE FROM linkedin_inbox_messages WHERE id LIKE 'demo_msg_%'`).run();
   db.prepare(`DELETE FROM email_accounts WHERE id LIKE 'demo_email_%' OR owner_id = ?`).run(DEMO_USER_ID);
   db.prepare(`DELETE FROM accounts WHERE id LIKE 'demo_acc_%' OR owner_id = ?`).run(DEMO_USER_ID);
@@ -547,36 +525,7 @@ db.transaction(() => {
     );
   }
 
-  // 8. SOCIAL SELLING CON IA (15 Publicados en los últimos 4 meses + 15 Programados a futuro)
-  const socialSellingData = [
-    { topic: "Estrategia Outbound", content: "El mayor error en B2B no es el volumen, es la falta de contexto. 50 mensajes bien dirigidos superan a 1000 correos genéricos.", days: -90, status: "published" },
-    { topic: "Metodología", content: "Cómo diseñar una propuesta de valor en LinkedIn que genere conversaciones en menos de 48 horas.", days: -75, status: "published" },
-    { topic: "Caso de Éxito", content: "De 0 a 24 reuniones mensuales con SDR IA: desglosamos la cadencia paso a paso.", days: -60, status: "published" },
-    { topic: "Radar de Señales", content: "Por qué las publicaciones de tus competidores son la mejor fuente de leads calificados.", days: -45, status: "published" },
-    { topic: "Inteligencia Artificial", content: "El SDR IA no reemplaza al vendedor; elimina la fricción manual para que el equipo cierre más.", days: -30, status: "published" },
-    { topic: "Entregabilidad", content: "Warmup y salud de dominio: cómo mantener un 99% de bandeja de entrada en frío.", days: -15, status: "published" },
-    { topic: "Reflexión Comercial", content: "Tu perfil de LinkedIn es la landing page de tu solución. ¿La tuya convierte visitas en clientes?", days: -5, status: "published" },
-    { topic: "Tendencias 2026", content: "La era del spam masivo ha terminado. La prospección contextual dominará las ventas B2B este año.", days: 2, status: "scheduled" },
-    { topic: "Playbook de Ventas", content: "5 preguntas que debes hacer en tu mensaje de conexión para abrir una conversación real.", days: 5, status: "scheduled" },
-    { topic: "Productividad", content: "Cómo un equipo de 2 personas gestiona un pipeline de $500k con automatización inteligente.", days: 8, status: "scheduled" },
-    { topic: "SDR Autónomo", content: "Manejo de objeciones con agentes de IA: cómo entrenar respuestas que generan confianza.", days: 12, status: "scheduled" },
-  ];
-
-  let spIdx = 0;
-  for (const sp of socialSellingData) {
-    spIdx++;
-    const schedDate = sp.days < 0 ? daysAgo(Math.abs(sp.days)) : daysAhead(sp.days);
-    db.prepare(`
-      INSERT INTO social_selling_posts (
-        id, user_id, account_id, topic, content, status, scheduled_at, published_at, created_at
-      ) VALUES (?, ?, 'demo_acc_carlos', ?, ?, ?, ?, ?, ?)
-    `).run(
-      `demo_sp_${String(spIdx).padStart(3, "0")}`, DEMO_USER_ID, sp.topic, sp.content,
-      sp.status, schedDate, sp.status === "published" ? schedDate : null, daysAgo(100)
-    );
-  }
-
-  // 9. AGENDAMIENTOS & REUNIONES EN CALENDARIO (6 MESES DE HISTORIAL + PRÓXIMAS REUNIONES)
+  // 8. AGENDAMIENTOS & REUNIONES EN CALENDARIO (6 MESES DE HISTORIAL + PRÓXIMAS REUNIONES)
   // 18 reuniones completadas pasadas + 8 reuniones confirmadas próximas = 26 reuniones comerciales
   const meetingExecutives = [
     // Próximas Confirmadas (próximos 14 días)
